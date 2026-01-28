@@ -1,0 +1,370 @@
+{
+  "name": "Clinic",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "msg",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -288,
+        -80
+      ],
+      "id": "6e16f486-c456-4a53-a0b3-da75d229583e",
+      "name": "Webhook",
+      "webhookId": "4a3fdd36-1d5f-461b-8225-513f0cf292c1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.data.message.conversation }}",
+        "options": {
+          "systemMessage": "You are an secretary of a dental office named \"Mustapha-IA\".\nYour mission is to respond politely and professionally to patients on dental office's services only.\nYou should answer the patients questions following the office context and do not give medical information or any other type of information that is out of the rules and context that I gave you. \n\n-One of your missions is to create a new patient file:\nfor this task you can use the tool \"Open New File\", ask the patient about his name, his last name and his email than use the tool to open a new file for him\n\n- check for a available appointment :\nfor this you can use the tool \"Check Appointment\", \nfor proper using of this tool, as a first parameter ask the user for the date that he would like to have his service, then ask him for what type of service would he want to be taken as, then depending on the service he choses, go look for the duration of that service and pass these two parameters to the tool so that we can get the available slot on that date, this is an exemple for the query of the API :\nhttps://manqtznzynkcjevzyjwd.supabase.co/functions/v1/api-slots?date=2025-01-20&duration=30\n, after the user choses a slot and before confirming it via the confirm an appointment function, we must ask the if he already has a file on our system or not, and we can check that with the tool \"Check patient\" via his email, if we find a match that means that he has a file else we should ask him to create a file on our system \n\n- confirm an appointment :\nafter the user choses an available slot time and either he already has a file on our systems, or we guide him to create one, we can than confirm his appointment by getting his id when we look him up in our system and sending a request via the tool \"Confirm Appointment\", that contains a body like the exemple here :\n{\n  \"patient_id\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"service_id\": \"660e8400-e29b-41d4-a716-446655440001\",\n  \"appointment_date\": \"2025-01-20\",\n  \"start_time\": \"10:00\",\n  \"end_time\": \"10:30\",\n  \"notes\": \"Regular checkup\",\n  \"status\": \"scheduled\"\n}\nyou can consider the status as scheduled by default\nand the service_id you can find it with the tool \"Get Clinic Service\" and than getting the service_number corresponding to the service name \n\n- answer the services that the office propose :  \nfor this you can use the tool \"Get Service Clinic\" to extract the necessary information\n\n- do not include \\n or any thing that could break a JSON value format, because the output you make will be passed as an input for a json body response"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        16,
+        -80
+      ],
+      "id": "80fc3ab0-798d-43f1-90c9-0134db35a0b1",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -192,
+        192
+      ],
+      "id": "d3b28f78-2eb4-4c7e-86f4-9f4e7bf62a60",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YnRES5BFDgxg3xpG",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "Z9kwoc2emWZGAMtT",
+          "mode": "list",
+          "cachedResultName": "clinic_services",
+          "cachedResultUrl": "/projects/0r07ohd8zhkCzACt/datatables/Z9kwoc2emWZGAMtT"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}"
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        128
+      ],
+      "id": "dc5fc10a-a593-4e54-8205-5f5f83f06337",
+      "name": "Get Service Clinic"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://manqtznzynkcjevzyjwd.supabase.co/functions/v1/api-patients",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "first_name",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "last_name",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', ``, 'string') }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters2_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        512,
+        128
+      ],
+      "id": "c87c199b-c65b-4db5-a876-514994974dc5",
+      "name": "Open New File"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.data.key.id }}",
+        "contextWindowLength": 8
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -48,
+        192
+      ],
+      "id": "a10f828b-2226-4b34-8c84-b8b71d7783af",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "url": "https://manqtznzynkcjevzyjwd.supabase.co/functions/v1/api-slots",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "date",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "duration",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        384,
+        128
+      ],
+      "id": "c31dce5b-a516-4b81-9bd1-afcd6bc7fdc1",
+      "name": "Check Appointment"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://manqtznzynkcjevzyjwd.supabase.co/functions/v1/api-appointments",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "patient_id",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "service_id",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', `the service_id is the service_number that you can find with the tool \"Get Service Clinic\" and than looking for the number corresponding to that service `, 'string') }}"
+            },
+            {
+              "name": "appointment_date",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters2_Value', ``, 'string') }}"
+            },
+            {
+              "name": "start_time",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters3_Value', ``, 'string') }}"
+            },
+            {
+              "name": "end_time",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters4_Value', ``, 'string') }}"
+            },
+            {
+              "name": "notes",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters5_Value', ``, 'string') }}"
+            },
+            {
+              "name": "status",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters6_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        256,
+        128
+      ],
+      "id": "48cf61db-3c44-4d06-b111-32b7c416131b",
+      "name": "Confirm Appointment"
+    },
+    {
+      "parameters": {
+        "url": "https://manqtznzynkcjevzyjwd.supabase.co/functions/v1/api-patients",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "search",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `email of the patient`, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        144,
+        128
+      ],
+      "id": "24b0eb21-5aee-4f94-ad2a-3e95d54f7f7e",
+      "name": "Check Patient"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://wbot.einvotca.com/message/sendText/{{ $('Webhook').item.json.body.instance }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "8EF7EA0F-91BF-4853-9250-D1359651E1BF"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Webhook').item.json.body.data.key.remoteJid }}\",\n  \"textMessage\": {\n    \"text\": {{ JSON.stringify($json.output) }}\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        480,
+        -80
+      ],
+      "id": "0ef991f6-4067-41f2-8b4a-7f7116f59b62",
+      "name": "Send Message"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Service Clinic": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Open New File": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Appointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirm Appointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Patient": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "bb94b80d-1a9c-417c-ad29-f331bf53417a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c942b567ce6cf7850fc3543fbb30903f89c371ab153ca7f6f4562e4629243700"
+  },
+  "id": "ezbKzMklxbvJtD0CFJ8n1",
+  "tags": []
+}

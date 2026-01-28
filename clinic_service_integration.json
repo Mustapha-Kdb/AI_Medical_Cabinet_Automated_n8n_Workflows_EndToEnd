@@ -1,0 +1,202 @@
+{
+  "name": "clinic_service_integration",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://manqtznzynkcjevzyjwd.supabase.co/functions/v1/api-services",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -416,
+        0
+      ],
+      "id": "e7f31806-4948-4698-9241-ea59438c1918",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        0
+      ],
+      "id": "244e916a-461e-42fa-b244-9fdc09ecf3c4",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "Z9kwoc2emWZGAMtT",
+          "mode": "list",
+          "cachedResultName": "clinic_services",
+          "cachedResultUrl": "/projects/0r07ohd8zhkCzACt/datatables/Z9kwoc2emWZGAMtT"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "service_number",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "service_number": "={{ $json.id }}",
+            "service_price": "={{ $json.price }}",
+            "service_name": "={{ $json.name }}",
+            "duration": "={{ $json.duration_minutes }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "service_number",
+              "displayName": "service_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "service_name",
+              "displayName": "service_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "service_price",
+              "displayName": "service_price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "duration",
+              "displayName": "duration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -48,
+        0
+      ],
+      "id": "95299bc1-ce93-402d-86b2-a502eb2cfeaa",
+      "name": "Upsert row(s)"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        160,
+        0
+      ],
+      "id": "47c9a9f2-dac7-4901-9cb7-5fdc2113c3e2",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -640,
+        0
+      ],
+      "id": "4252256c-4ca3-4fd5-b76c-1fd324c14572",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Upsert row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert row(s)": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "0238ab60-a356-4b91-82ad-5b30363a5715",
+  "meta": {
+    "instanceId": "c942b567ce6cf7850fc3543fbb30903f89c371ab153ca7f6f4562e4629243700"
+  },
+  "id": "1ErgRzw2MpDpTaPW7qfxn",
+  "tags": []
+}
