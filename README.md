@@ -38,7 +38,7 @@ To ensure a personalized and secure experience, the agent implements a **Persist
 
 * **Isolated Sessions:** The AI keeps track of the conversation history specifically for each sender ID. This ensures the agent remembers past questions and context from the current user.
 * **Data Privacy & Leak Prevention:** The memory architecture guarantees that user data is strictly isolated. The model cannot access or "leak" information from one user's session to another, ensuring that private medical inquiries remain confidential.
-* **Context Accuracy:** By filtering memory through unique IDs, the agent avoids "hallucinating" details from other conversations, providing highly accurate and context-aware responses.
+* **Context Accuracy:** By filtering memory through unique IDs, the agent avoids "hallucinating" details from other conversations, providing highly accurate and context-aware responses. 
 
 ## 🛠️ Tech Stack
 * **Automation:** [n8n.io](https://n8n.io/)
